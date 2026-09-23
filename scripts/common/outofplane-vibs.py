@@ -356,7 +356,7 @@ def classify_modes(modes, degen_tol=1.0, eg_trace_tol=0.3, clean_tol=0.9):
 # Shared color normalization
 # ============================================================================
 
-def make_shared_norm(modes, zscale=None):
+def make_shared_norm(modes, zscale=None, ignore_elements=None):
     """
     Create one color normalization shared by all selected modes.
 
@@ -366,7 +366,10 @@ def make_shared_norm(modes, zscale=None):
     then those values are used directly.
 
     Otherwise the color scale is symmetric around zero and is determined
-    from the largest absolute dz among all atoms in all selected modes.
+    from the largest absolute dz among all *displayed* atoms in all
+    selected modes -- i.e. after dropping any symbols in
+    `ignore_elements`, so a hidden element's large displacement doesn't
+    stretch the scale for the atoms actually shown.
     (Ag atoms have already been removed at read time.)
     """
 
@@ -382,6 +385,10 @@ def make_shared_norm(modes, zscale=None):
     for mode in modes:
 
         dz = mode["displacements"][:, 2]
+
+        if ignore_elements:
+            keep = ~np.isin(mode["symbols"], ignore_elements)
+            dz = dz[keep]
 
         if len(dz) > 0:
             max_abs = max(
@@ -415,11 +422,16 @@ def plot_vibration_mode(
     atoms_size=2000,
     fontsize=18,
     cmap_name="RdBu",
+    ignore_elements=None,
 ):
     """
     Plot one vibrational mode into an existing matplotlib axis.
 
-    Ag atoms have already been removed at read time.
+    Ag atoms have already been removed at read time. Any symbols in
+    `ignore_elements` (e.g. ["H"] or ["H", "Ag"]) are additionally
+    hidden here, for this plot only -- they are NOT removed from the
+    underlying `mode` data, so symmetry analysis elsewhere is
+    unaffected.
 
     If `idx` is given, the title includes "Mode <idx>, ".
     If `label` is given (symmetry label), it is appended to the title.
@@ -454,8 +466,20 @@ def plot_vibration_mode(
             dtype=bool
         )
 
-    # Final selection: inside x limits AND inside y limits
-    selection = idx_x & idx_y
+    # ------------------------------------------------------------------------
+    # Ignored elements (plotting only -- does not touch mode data)
+    # ------------------------------------------------------------------------
+
+    if ignore_elements:
+        idx_keep = ~np.isin(mode["symbols"], ignore_elements)
+    else:
+        idx_keep = np.ones(
+            len(positions),
+            dtype=bool
+        )
+
+    # Final selection: inside x limits AND inside y limits AND not ignored
+    selection = idx_x & idx_y & idx_keep
 
     # ------------------------------------------------------------------------
     # Colormap
@@ -526,7 +550,7 @@ def plot_vibration_mode(
 
     title_parts = []
     if idx is not None:
-        title_parts.append(f"Mode {idx}")
+        title_parts.append(f"{idx}")
     title_parts.append(f"{mode['freq']:.1f} cm$^{{-1}}$")
     if label is not None:
         # Bold just the symmetry label via mathtext. Mathtext chokes on
@@ -564,6 +588,7 @@ def plot_vibration_modes(
     cmap_name="RdBu",
     xlim=None,
     ylim=None,
+    ignore_elements=None,
 ):
     """
     Plot several vibrational modes in one vertical figure.
@@ -579,6 +604,11 @@ def plot_vibration_modes(
 
     `labels`, if given, is a dict {mode_index: symmetry_label} used to
     annotate each subplot's title.
+
+    `ignore_elements`, if given (e.g. ["H"] or ["H", "Ag"]), hides
+    those symbols from the plot and from the automatic color-scale
+    calculation, WITHOUT affecting symmetry analysis (which is done
+    upstream on the full, unfiltered mode data).
     """
 
     selected_modes = [
@@ -594,7 +624,8 @@ def plot_vibration_modes(
 
     norm = make_shared_norm(
         selected_modes,
-        zscale=zscale
+        zscale=zscale,
+        ignore_elements=ignore_elements,
     )
 
     # ------------------------------------------------------------------------
@@ -638,6 +669,7 @@ def plot_vibration_modes(
             atoms_size=atoms_size,
             fontsize=fontsize,
             cmap_name=cmap_name,
+            ignore_elements=ignore_elements,
         )
 
     # ------------------------------------------------------------------------
@@ -808,6 +840,26 @@ if __name__ == "__main__":
     )
 
     # ------------------------------------------------------------------------
+    # Ignore elements (plotting only)
+    # ------------------------------------------------------------------------
+
+    parser.add_argument(
+        "--ignore-elements",
+        type=str,
+        nargs="+",
+        default=None,
+        metavar="SYMBOL",
+        help=(
+            "Element symbols to hide from the plot, e.g. "
+            "--ignore-elements H  or  --ignore-elements H Ag. "
+            "Only affects what is drawn and the automatic color "
+            "scale -- symmetry analysis (--symmetry) still uses the "
+            "full structure. (Ag atoms are always dropped separately, "
+            "everywhere, at read time.)"
+        )
+    )
+
+    # ------------------------------------------------------------------------
     # Save PNG
     # ------------------------------------------------------------------------
 
@@ -946,6 +998,7 @@ if __name__ == "__main__":
         labels=labels,
         zscale=args.zscale,
         atoms_size=args.atoms_size,
+        ignore_elements=args.ignore_elements,
     )
 
     # =========================================================================
