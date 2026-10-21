@@ -1,4 +1,11 @@
-docs/_build/
-scripts/mariana_model/core/__pycache__/
-calculations/
-scripts/simple_model/utils/__pycache__/
+# Ignore everything inside calculations/ ...
+calculations/**
+# ... but let Git look inside subdirectories
+!calculations/**/
+# ... and track everything inside any inputs/ or outputs/ folder
+!calculations/**/inputs/**
+!calculations/**/outputs/**
+!calculations/**/readme.md
+
+__pycache__/
+*.pyc

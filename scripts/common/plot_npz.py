@@ -23,6 +23,43 @@ parser.add_argument("--interpolate", action="store_true")
 parser.add_argument("--savepng", action="store_true")
 parser.add_argument("--index_offset", type=int, default=0)
 parser.add_argument(
+    "--weights",
+    type=float,
+    nargs='+',
+    default=None,
+    help=(
+        "Weighted sum of normalized images. Give one weight per mode, "
+        "in the order: mode, then each of --modes. Each image is first "
+        "normalized to max |intensity| = 1, then multiplied by its "
+        "weight and summed. Example: 12 --modes 15 --weights 0.7 0.3"
+    )
+)
+parser.add_argument(
+    "--gauss_center",
+    type=float,
+    default=None,
+    help=(
+        "Gaussian-weighted sum: center frequency in cm^-1. Use together "
+        "with --gauss_sigma. All modes within --gauss_cutoff sigmas of the "
+        "center are selected automatically (no mode number needed), each "
+        "image keeps its absolute intensity (no normalization) and is "
+        "weighted by w_i = exp(-(f_i - center)^2 / (2 sigma^2)). "
+        "Example: data.npz --gauss_center 1580 --gauss_sigma 10"
+    )
+)
+parser.add_argument(
+    "--gauss_sigma",
+    type=float,
+    default=None,
+    help="Gaussian-weighted sum: width sigma in cm^-1 (use with --gauss_center)."
+)
+parser.add_argument(
+    "--gauss_cutoff",
+    type=float,
+    default=3.0,
+    help="Gaussian-weighted sum: include modes within this many sigmas of the center (default 3)."
+)
+parser.add_argument(
     "--subplot",
     action="store_true",
     help=(
@@ -39,7 +76,8 @@ args = parser.parse_args()
 # npzfile: ask if missing
 # --------------------
 if args.npzfile is None:
-    print("No npzfile provided. Usage: plot_npz.py <npzfile> <mode> [options]")
+    print("No npzfile provided. Usage: plot_npz.py <npzfile> <mode> [options]\n"
+          "   or: plot_npz.py <npzfile> --gauss_center <cm-1> --gauss_sigma <cm-1>")
     sys.exit(1)
 
 # --------------------
@@ -55,13 +93,68 @@ positions = data["atom_pos"]
 numbers = data["atomic_numbers"]
 
 # --------------------
+# gaussian mode: select modes automatically from center frequency
+# --------------------
+gaussian = args.gauss_center is not None or args.gauss_sigma is not None
+
+if gaussian:
+    if args.gauss_center is None or args.gauss_sigma is None:
+        print("Gaussian weighting needs both --gauss_center and --gauss_sigma.")
+        sys.exit(1)
+    if args.gauss_sigma <= 0:
+        print("--gauss_sigma must be positive.")
+        sys.exit(1)
+    if args.mode is not None or args.modes or args.weights is not None or args.subplot:
+        print("With --gauss_center/--gauss_sigma, don't pass a mode, --modes, "
+              "--weights or --subplot: modes are selected automatically.")
+        sys.exit(1)
+
+    dist = np.abs(freqs - args.gauss_center)
+    selected = np.where(dist <= args.gauss_cutoff * args.gauss_sigma)[0]
+    if selected.size == 0:
+        print(f"No modes within {args.gauss_cutoff:g} sigma "
+              f"({args.gauss_cutoff * args.gauss_sigma:g} cm-1) of "
+              f"{args.gauss_center:g} cm-1. Try a larger --gauss_sigma.")
+        sys.exit(1)
+
+    # closest mode first: its grid is the reference grid for the sum
+    selected = selected[np.argsort(dist[selected])]
+    sel_modes = [int(mode_indices[i]) for i in selected]
+    args.mode, args.modes = sel_modes[0], sel_modes[1:]
+
+    args.weights = []
+    print(f"Gaussian weights (center {args.gauss_center:g} cm-1, "
+          f"sigma {args.gauss_sigma:g} cm-1, cutoff {args.gauss_cutoff:g} sigma):")
+    for i, m in zip(selected, sel_modes):
+        w = float(np.exp(-(freqs[i] - args.gauss_center) ** 2 / (2 * args.gauss_sigma ** 2)))
+        args.weights.append(w)
+        print(f"  mode {m + args.index_offset}: {freqs[i]:.1f} cm-1  ->  weight {w:.4f}")
+
+# --------------------
 # mode: check missing / invalid
 # --------------------
 if args.mode is None or args.mode not in mode_indices:
-    print("No valid mode provided. Please choose a mode from the list above.")
+    print("No valid mode provided. Please choose a mode from the list above, "
+          "or use --gauss_center/--gauss_sigma.")
     sys.exit(1)
 
 all_modes = [args.mode] + (args.modes or [])
+
+# --------------------
+# weights: check count
+# --------------------
+if args.weights is not None and len(args.weights) != len(all_modes):
+    print(
+        f"--weights needs one value per mode ({len(all_modes)} modes: "
+        f"{all_modes}), but got {len(args.weights)}."
+    )
+    sys.exit(1)
+
+
+def normalize(z):
+    """Scale an image so its maximum absolute intensity is 1."""
+    zmax = np.abs(z).max()
+    return z / zmax if zmax > 0 else z
 
 
 def get_grid(m):
@@ -119,6 +212,14 @@ def overlay_molecule(ax):
 offset = args.index_offset
 mode_str = "+".join(str(m + offset) for m in all_modes)
 freq_str = ", ".join(f"{freq_of(m):.1f}" for m in all_modes)
+
+if args.weights is not None:
+    if gaussian:
+        weight_str = f"gauss_{args.gauss_center:g}_sigma{args.gauss_sigma:g}"
+    else:
+        weight_str = ":".join(f"{w:g}" for w in args.weights)
+    if args.subplot:
+        print("Note: --weights is ignored with --subplot (panels are plotted separately).")
 
 
 # ============================================================================
@@ -179,8 +280,20 @@ if args.subplot:
 x, y, z = get_grid(args.mode)
 z = z.copy()
 
-for m in (args.modes or []):
+weighted = args.weights is not None
+# manual --weights: normalize each image first
+# gaussian: keep absolute intensities, weights applied on top
+prep = (lambda a: a) if gaussian else normalize
+if weighted:
+    z = args.weights[0] * prep(z)
+
+for i, m in enumerate(args.modes or [], start=1):
     xm, ym, zm = get_grid(m)
+
+    if weighted:
+        # normalize on the mode's own full grid (before interpolation),
+        # so the peak used for scaling isn't affected by grid mismatch
+        zm = args.weights[i] * prep(zm)
 
     interp = RegularGridInterpolator(
         (xm, ym),
@@ -224,7 +337,11 @@ im = ax.imshow(
     aspect="equal",
     interpolation="bilinear" if args.interpolate else "nearest"
 )
-fig.colorbar(im, ax=ax)
+cbar = fig.colorbar(im, ax=ax)
+if gaussian:
+    cbar.set_label("Gaussian-weighted intensity")
+elif weighted:
+    cbar.set_label("weighted normalized intensity")
 
 
 # --------------------
@@ -237,7 +354,14 @@ if args.molecule:
 # --------------------
 # labels
 # --------------------
-ax.set_title(f"TERS image modes {mode_str} ({freq_str} cm⁻¹)")
+title = f"TERS image modes {mode_str} ({freq_str} cm⁻¹)"
+if gaussian:
+    title = (f"TERS image, Gaussian at {args.gauss_center:g} cm⁻¹, "
+             f"σ = {args.gauss_sigma:g} cm⁻¹\n"
+             f"{len(all_modes)} modes, absolute intensities")
+elif weighted:
+    title += f"\nweights {weight_str} (normalized)"
+ax.set_title(title)
 ax.set_xlabel("x [Å]")
 ax.set_ylabel("y [Å]")
 
@@ -252,7 +376,11 @@ if args.savepng:
     outdir = Path("images")
     outdir.mkdir(exist_ok=True, parents=True)
 
-    outfile = outdir / f"TERS_modes_{mode_str}.png"
+    if gaussian:
+        outfile = outdir / f"TERS_{weight_str}.png"
+    else:
+        suffix = f"_w{weight_str.replace(':', '-')}" if weighted else ""
+        outfile = outdir / f"TERS_modes_{mode_str}{suffix}.png"
     plt.savefig(outfile, dpi=300, bbox_inches="tight")
     print(f"Saved to {outfile}")
 
