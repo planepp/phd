@@ -1,11 +1,27 @@
-# Ignore everything inside calculations/ ...
-calculations/**
-# ... but let Git look inside subdirectories
-!calculations/**/
-# ... and track everything inside any inputs/ or outputs/ folder
-!calculations/**/inputs/**
-!calculations/**/outputs/**
-!calculations/**/readme.md
-
 __pycache__/
 *.pyc
+
+# Ignore everything inside calculations/ ...
+calculations/**
+!calculations/**/
+
+# Curated folders: track everything placed here by hand
+!calculations/**/inputs/**
+!calculations/**/outputs/**
+
+# Track these automatically, wherever they are
+!calculations/**/control.in
+!calculations/**/geometry.in
+!calculations/**/geometry.in.next_step
+!calculations/**/aims.out
+!calculations/**/*.sh
+!calculations/**/*.com
+!calculations/**/*.xyz
+!calculations/**/massweighted_Hessian.*.dat
+!calculations/**/*.py
+!calculations/**/readme.md
+
+# Never track the per-point/per-mode runs (thousands of files)
+calculations/**/ters2d/**
+calculations/**/ters1d/**
+calculations/**/nmodes/**
