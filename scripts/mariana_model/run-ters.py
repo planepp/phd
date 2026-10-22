@@ -41,7 +41,7 @@ species_dir = Path(species_dir),
 #fn_tip_groundstate = Path('zeros.cube'),
 fn_tip_groundstate = None,
 #fn_tip_derivative = Path('tipA_05_vh_ft_0049_3221meV_x1000.cube'),
-fn_tip_derivative = Path('mygaussian_w2.cube'),
+fn_tip_derivative = Path('mygaussian_w4.cube'),
 #fn_elsi_restart = Path('D_spin_01_kpt_000001.csc'),
 fn_elsi_restart = None,
 fn_geometry = Path(geo_unconstrained),
@@ -96,8 +96,8 @@ def read_grid_coords(mode_idx: int, base_dir: Path = Path("ters2d")):
 #ys = np.zeros(4)
 
 # -- Grid
-x = np.linspace(-10, 10, 20)
-y = np.linspace(-10, 10, 20)
+x = np.linspace(-10, 10, 15)
+y = np.linspace(-10, 10, 15)
 X, Y = np.meshgrid(x, y)
 xs, ys = X.ravel(), Y.ravel()
 
@@ -105,7 +105,7 @@ xs, ys = X.ravel(), Y.ravel()
 ### Run 2D scan
 run2d = True
 if run2d:
-    mode_indices = [35, 36, 37, 38, 39]
+    mode_indices = [34]
     for idx_mode in mode_indices:
         ters.run_2d_grid(
             working_dir = Path(f'ters2d'),
