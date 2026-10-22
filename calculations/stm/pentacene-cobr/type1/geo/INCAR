@@ -1,0 +1,36 @@
+# Electronic Relaxation
+ENCUT = 400
+PREC = Accurate
+EDIFF = 1E-6
+ISMEAR = 0
+SIGMA = 0.1
+LWAVE = .TRUE.
+LCHARG = .TRUE.
+NELM = 300
+
+IVDW = 12
+
+# Ionic Relaxation
+IBRION = 2
+ISIF = 0
+EDIFFG = -0.01
+POTIM = 0.15
+
+# Magnetism
+ISPIN = 2
+LORBIT = 11
+MAGMOM = 156*0 4*-3 12*3 24*0 22*0 14*0 
+
+LREAL=.FALSE.
+LPLANE=.TRUE.
+NCORE=8
+KPAR = 4
+LDIPOL=.TRUE.
+IDIPOL=3
+DIPOL=0.50 0.50 0.255
+
+ISTART = 0
+
+ALGO    = All     ! was All: cheaper per step
+LMAXMIX = 4        ! new: better SCF convergence for Co d-states
+NSW     = 300       ! fits a 24 h job with margin, exits cleanly

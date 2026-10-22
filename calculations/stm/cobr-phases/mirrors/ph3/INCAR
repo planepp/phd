@@ -1,0 +1,44 @@
+SYSTEM = Phase 3
+# Electronic Relaxation
+ENCUT = 400
+PREC = Accurate
+IALGO = 58
+EDIFF = 1E-6
+ISMEAR = 1
+SIGMA = 0.1
+LWAVE = .FALSE.
+LCHARG = .FALSE.
+LREAL = .FALSE.
+NELM = 200
+
+# Ionic Relaxation 
+EDIFFG = 1E-2
+IBRION = 2
+ISIF = 2
+NSW = 200
+POTIM = 0.1
+
+# Magnetism
+ISPIN = 2
+MAGMOM = 27*0 4*3 6*-0.5
+LORBIT = 11
+
+# Others
+ICHARG = 2
+IDIPOL = 3
+LDIPOL = .TRUE.
+ISTART = 0
+IVDW = 12
+ISYM = 2
+NELMIN = 6
+
+# Charge mixing
+AMIX = 0.05
+BMIX = 0.0001
+AMIX_MAG = 0.05
+BMIX_MAG = 0.0001
+
+
+KPAR = 1
+NCORE = 8
+

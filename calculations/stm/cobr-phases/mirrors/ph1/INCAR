@@ -1,0 +1,29 @@
+# Electronic Relaxation
+ENCUT = 500
+PREC = Accurate
+#ALGO = All
+EDIFF = 1E-6
+ISMEAR = 0
+SIGMA = 0.1
+LWAVE = .TRUE.
+LCHARG = .TRUE.
+NELM = 300
+
+IVDW = 12
+
+# Ionic Relaxation
+IBRION = 1
+NSW = 1000
+ISIF = 0
+EDIFFG = -5E-3
+
+# Magnetism
+ISPIN = 2
+LORBIT = 11
+MAGMOM = 39*0 3 3 3 6*0
+
+LREAL=auto
+LPLANE=.TRUE.
+NCORE=16
+NSIM=1
+KPAR = 4

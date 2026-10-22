@@ -1,0 +1,30 @@
+ System = FePc
+ ISTART = 0
+ ICHARG = 2
+
+ ISMEAR =  0                   ! -5 = Tetra-Block, 0 = Gaussian, 
+ SIGMA = 0.100
+#GGA    = PE
+ ENCUT  = 400                 ! Kinetic energy cutoff
+ NELM = 220
+
+ IVDW = 12
+
+ IBRION = 2   	       	      !	-1 = Fix atoms, 1 = RMM-DIIS ,2 =  CG relax
+ NSW    = 2000     	      !	Number of ionic	steps
+ EDIFF  = 1e-04
+ EDIFFG = -0.01
+ ISIF = 0
+
+ PREC = accurate
+ LREAL=auto
+ LPLANE=.TRUE.
+ NCORE=16
+ NSIM=1
+
+
+ LORBIT = 11
+ EMIN = -10.
+ EMAX = 5.
+ NEDOS = 5000
+

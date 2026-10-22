@@ -1,0 +1,26 @@
+ System = Cycle
+
+#clean start change ISTART and ICHARG to 1 to restart later
+ISTART= 0
+ICHARG = 2
+LWAVE = .FALSE.
+LCHARG = .FALSE.
+ISMEAR = 0
+SIGMA = 0.1
+#lower ECUT to try and get convergence
+PREC = accurate
+NELMIN = 3
+NELM = 200
+ALGO = Fast
+ENCUT = 400
+NSW = 0
+IBRION = -1
+IVDW = 12
+
+LREAL=auto
+LPLANE=.TRUE.
+NCORE=16
+NSIM=4
+
+EDIFF = 1E-6
+ISYM = 0

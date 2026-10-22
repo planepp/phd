@@ -1,0 +1,32 @@
+System = Cycle NEB
+ ISTART = 1
+ ICHARG = 0
+
+ ISMEAR = 0
+ SIGMA = 0.100
+ ENCUT  = 400
+ NELM = 220
+
+ IVDW = 12
+
+ IBRION = 3
+ NSW    = 300
+ EDIFF  = 1e-06
+ EDIFFG = -0.03
+ ISIF = 0
+ ISYM = 0
+
+ PREC = accurate
+ LREAL=auto
+ LPLANE=.TRUE.  
+ NCORE=16
+ NSIM=4
+ LCHARG=.FALSE.
+
+ IMAGES = 5
+ SPRING = -5
+ ICHAIN = 0
+ LCLIMB = .TRUE.
+ POTIM  = 0
+ IOPT   = 7
+ALGO=Fast

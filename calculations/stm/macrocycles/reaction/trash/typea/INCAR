@@ -1,0 +1,33 @@
+System = Reaction NEB
+ ISTART = 0
+ ICHARG = 2
+
+ ISMEAR = 0
+ SIGMA = 0.100
+#GGA    = PE
+ ENCUT  = 400
+ NELM = 220
+
+ IVDW = 12
+
+ IBRION = 3
+ NSW    = 300
+ EDIFF  = 1e-06
+ EDIFFG = -0.1
+ ISIF = 0
+ ISYM = 0
+
+ PREC = accurate
+ LREAL=auto
+ LPLANE=.TRUE.
+ NCORE=16
+ NSIM=4
+ LCHARG=.FALSE.
+
+ IMAGES = 8
+ SPRING = -5
+ ICHAIN = 0
+ LCLIMB = .FALSE.
+ POTIM  = 0
+ IOPT   = 7
+ ALGO=Fast

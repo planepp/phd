@@ -30,3 +30,20 @@ calculations/**/nmodes/**
 calculations/**/1dscan*/**
 calculations/**/2dscan*/**
 calculations/**/job_launchers/**
+
+# VASP inputs and small outputs
+!calculations/**/INCAR
+!calculations/**/POSCAR*
+!calculations/**/KPOINTS
+!calculations/**/CONTCAR*
+!calculations/**/OSZICAR
+
+# VASP: never track pseudopotentials or large data
+calculations/**/POTCAR
+calculations/**/WAVECAR
+calculations/**/CHG
+calculations/**/CHGCAR
+calculations/**/LOCPOT
+calculations/**/PROCAR
+calculations/**/OUTCAR
+calculations/**/vasprun.xml

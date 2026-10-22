@@ -1,0 +1,72 @@
+SYSTEM =  Surf
+
+#clean start change ISTART and ICHARG to 1 to restart later
+
+ISTART= 0
+ICHARG = 2
+LWAVE = .FALSE.
+LCHARG = .FALSE.
+#ISTART = 0
+ISMEAR = 0 ! Small K-Points Only
+SIGMA = 0.1
+#lower ECUT to try and get convergence
+PREC = accurate 
+NELMIN = 3
+NELM = 200
+ADDGRID = .TRUE. ! not with MB-DISP
+ALGO = Fast
+ENCUT = 400
+
+#ISPIN = 2
+#MAGMOM = 10*1. 9*-1. 15*.0 196*.0
+#NUPDOWN = .0
+
+NSW = 0
+#IMAGES = 8
+#LCLIMB = .TRUE.
+#IBRION = 1
+IBRION = -1
+#POTIM = 0
+#ISIF = 0
+#IOPT = 7 ! 0=VASP, 2=CONJ, 1=BFGS, 7=fire, 3=qmin
+#INVCURV = 0.005
+#POTIM = 0.2
+#EDIFF = 0.005
+#EDIFFG = -0.01 relax tolerance
+#ISIF = 4
+
+#vdw optB86b-vdW
+#GGA = MK 
+#PARAM1 = 0.1234 
+#PARAM2 = 1.0000
+#LUSE_VDW = .TRUE.
+#AGGAC = 0.0000
+
+#Many-body dispersion energy method
+#IVDW = 202
+
+#D3 Grimme + BJ damping
+IVDW = 12
+
+# options for PDOS
+#EMIN = -10.
+#EMAX = 3.
+#LORBIT = 11
+#NEDOS = 5000
+#LVHAR = .TRUE.
+
+#Paralellisation switches - NPAR = no proc / 8 or 16....
+#IALGO=38
+LREAL=auto
+LPLANE=.TRUE.
+NCORE=16
+NSIM=1
+#LWAVE = .FALSE.
+#LCHARG = .TRUE.
+
+# STM options
+#LPARD = .TRUE. ! partial charge density
+#EINT = 1.5  ! bias
+#EINT = 1.5 ! bias
+#NBMOD = -3 ! energy range with respect to Fermi energy.
+
