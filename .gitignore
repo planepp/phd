@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
+docs/_build/
 
 # Ignore everything inside calculations/ ...
 calculations/**
