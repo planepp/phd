@@ -20,6 +20,7 @@ calculations/**
 !calculations/**/massweighted_Hessian.*.dat
 !calculations/**/*.py
 !calculations/**/readme.md
+calculations/**/*.png
 
 # Never track the per-point/per-mode runs (thousands of files)
 calculations/**/ters2d/**
