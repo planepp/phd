@@ -26,3 +26,6 @@ calculations/**/*.png
 calculations/**/ters2d/**
 calculations/**/ters1d/**
 calculations/**/nmodes/**
+calculations/**/1dscan*/**
+calculations/**/2dscan*/**
+calculations/**/job_launchers/**
