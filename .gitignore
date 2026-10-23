@@ -4,13 +4,10 @@ docs/_build/
 
 # Ignore everything inside calculations/ ...
 calculations/**
+# ... but let Git look inside subdirectories
 !calculations/**/
 
-# Curated folders: track everything placed here by hand
-!calculations/**/inputs/**
-!calculations/**/outputs/**
-
-# Track these automatically, wherever they are
+# Track these automatically, wherever they are (FHI-aims, Gaussian, scripts)
 !calculations/**/control.in
 !calculations/**/geometry.in
 !calculations/**/geometry.in.next_step
@@ -21,24 +18,30 @@ calculations/**
 !calculations/**/massweighted_Hessian.*.dat
 !calculations/**/*.py
 !calculations/**/readme.md
-calculations/**/*.png
 
-# Never track the per-point/per-mode runs (thousands of files)
-calculations/**/ters2d/**
-calculations/**/ters1d/**
-calculations/**/nmodes/**
-calculations/**/1dscan*/**
-calculations/**/2dscan*/**
-calculations/**/job_launchers/**
-
-# VASP inputs and small outputs
+# Track these automatically, wherever they are (VASP)
 !calculations/**/INCAR
 !calculations/**/POSCAR*
 !calculations/**/KPOINTS
 !calculations/**/CONTCAR*
 !calculations/**/OSZICAR
 
-# VASP: never track pseudopotentials or large data
+# Never track the per-point/per-mode runs (thousands of files)
+calculations/**/ters1d/**
+calculations/**/ters2d/**
+calculations/**/nmodes/**
+calculations/**/1dscan*/**
+calculations/**/2dscan*/**
+calculations/**/job_launchers/**
+
+# ...but curated folders always win over the exclusions above
+!calculations/**/inputs/**/
+!calculations/**/inputs/**
+!calculations/**/outputs/**/
+!calculations/**/outputs/**
+
+# Never tracked anywhere, not even in curated folders
+calculations/**/*.png
 calculations/**/POTCAR
 calculations/**/WAVECAR
 calculations/**/CHG
